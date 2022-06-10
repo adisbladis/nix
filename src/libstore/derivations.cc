@@ -5,6 +5,7 @@
 #include "worker-protocol.hh"
 #include "fs-accessor.hh"
 #include <boost/container/small_vector.hpp>
+#include <iostream>
 
 namespace nix {
 
@@ -139,6 +140,9 @@ StorePath writeDerivation(Store & store,
        held during a garbage collection). */
     auto suffix = std::string(drv.name) + drvExtension;
     auto contents = drv.unparse(store, false);
+
+    std::cout << "CONTENTS: '" << contents << "'\n";
+
     return readOnly || settings.readOnlyMode
         ? store.computeStorePathForText(suffix, contents, references)
         : store.addTextToStore(suffix, contents, references, repair);
@@ -371,6 +375,9 @@ std::string Derivation::unparse(const Store & store, bool maskOutputs,
     s.reserve(65536);
     s += "Derive([";
 
+    std::cout << "Mask: " << maskOutputs << "\n";
+    std::cout << "Actual: " << actualInputs << "\n";
+
     bool first = true;
     for (auto & i : outputs) {
         if (first) first = false; else s += ',';
@@ -442,6 +449,8 @@ std::string Derivation::unparse(const Store & store, bool maskOutputs,
     }
 
     s += "])";
+
+    std::cout << "UNPARSED: " << s << "\n";
 
     return s;
 }
@@ -615,10 +624,12 @@ DrvHash hashDerivationModulo(Store & store, const Derivation & drv, bool maskOut
         std::map<std::string, Hash> outputHashes;
         for (const auto & i : drv.outputs) {
             auto & dof = std::get<DerivationOutput::CAFixed>(i.second.raw());
-            auto hash = hashString(htSHA256, "fixed:out:"
+            auto s = "fixed:out:"
                 + dof.hash.printMethodAlgo() + ":"
                 + dof.hash.hash.to_string(Base16, false) + ":"
-                + store.printStorePath(dof.path(store, drv.name, i.first)));
+                + store.printStorePath(dof.path(store, drv.name, i.first));
+            std::cout << "FIXED(" << drv.name << "): " << s << "\n";
+            auto hash = hashString(htSHA256, s);
             outputHashes.insert_or_assign(i.first, std::move(hash));
         }
         return DrvHash {

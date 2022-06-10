@@ -1289,6 +1289,7 @@ static void prim_derivationStrict(EvalState & state, const PosIdx pos, Value * *
                         .msg = hintfmt("derivation produced no hash for output '%s'", i),
                         .errPos = state.positions[posDrvName],
                     });
+                std::cout << "Calling makeOutputPath\n";
                 auto outPath = state.store->makeOutputPath(i, *h, drvName);
                 drv.env[i] = state.store->printStorePath(outPath);
                 drv.outputs.insert_or_assign(

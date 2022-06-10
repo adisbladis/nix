@@ -141,7 +141,9 @@ StorePath Store::makeStorePath(std::string_view type,
     /* e.g., "source:sha256:1abc...:/nix/store:foo.tar.gz" */
     auto s = std::string(type) + ":" + std::string(hash)
         + ":" + storeDir + ":" + std::string(name);
+    std::cout << s << "\n";
     auto h = compressHash(hashString(htSHA256, s), 20);
+    std::cout << h.to_string(Base32, true) << "\n";
     return StorePath(h, name);
 }
 
@@ -216,7 +218,12 @@ StorePath Store::makeTextPath(std::string_view name, const Hash & hash,
     /* Stuff the references (if any) into the type.  This is a bit
        hacky, but we can't put them in `s' since that would be
        ambiguous. */
-    return makeStorePath(makeType(*this, "text", references), hash, name);
+
+    std::cout << "Making text path\n";
+
+    auto storePath = makeStorePath(makeType(*this, "text", references), hash, name);
+    std::cout << "STOREPATH_hash: " << hash.to_string(Base32, false) << "\n";
+    return storePath;
 }
 
 

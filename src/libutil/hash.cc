@@ -317,6 +317,9 @@ Hash hashString(HashType ht, std::string_view s)
     start(ht, ctx);
     update(ht, ctx, s);
     finish(ht, ctx, hash.hash);
+
+    std::cout << "Hashed: '" << s << "' as base16:'" << hash.to_string(Base16, false) << "' base32:" << hash.to_string(Base32, false) << "'\n";
+
     return hash;
 }
 
